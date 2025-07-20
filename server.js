@@ -14,8 +14,10 @@ app.get("/", (req, res) => {
   res.send("🚲 BikeShop backend is running!");
 });
 
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use("/api/auth/", require("./routes/authRoutes"));
 app.use("/api/users/", require("./routes/userRoutes"))
+app.use("/api/products/", require("./routes/productRoutes"));
 
 app.listen(PORT, () => {
   console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);

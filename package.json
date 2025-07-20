@@ -12,6 +12,7 @@
     "mongodb": "^6.17.0",
     "mongodb-connection-string-url": "^3.0.2",
     "mongoose": "^8.16.4",
+    "multer": "^2.0.2",
     "punycode": "^2.3.1",
     "sparse-bitfield": "^3.0.3",
     "tr46": "^5.1.1",
