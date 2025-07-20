@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ordersController = require('../controllers/ordersController');
 const authMiddleware  = require('../middlewares/authMiddleware');
-const authorizeRoles = require('../middlewares/authorizeRoles');
+const authorizeRoles = require('../middlewares/authorizeRole');
 // Пользователь создаёт заказ
 router.post('/', authMiddleware, ordersController.createOrder);
 
