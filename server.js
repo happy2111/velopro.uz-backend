@@ -3,7 +3,9 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const path = require("path");
 require("dotenv").config();
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +25,10 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 
 
 
-app.listen(PORT, () => {
-  console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

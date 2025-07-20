@@ -1,4 +1,14 @@
 
+coverage/
+*.test.js.snap
+
+.env.test
+
+
+# mongodb-memory-server downloads
+**/mongodb-binaries
+
+
 # Created by https://www.gitignore.io/api/node,vim,git,macos,linux,sublimetext
 .idea/*
 ### Git ###
