@@ -18,6 +18,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use("/api/auth/", require("./routes/authRoutes"));
 app.use("/api/users/", require("./routes/userRoutes"))
 app.use("/api/products/", require("./routes/productRoutes"));
+app.use('/api/orders', require('./routes/orderRoutes'));
+
 
 app.listen(PORT, () => {
   console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);
