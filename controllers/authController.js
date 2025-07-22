@@ -28,16 +28,24 @@ exports.registerUser = async (req, res) => {
     // (Опционально) Сохраняем refreshToken в базе (если нужно для logout или блокировки)
     // user.refreshToken = refreshToken;
     // await user.save();
-
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      phone: user.phone,
-      email: user.email,
-      role: user.role,
-      accessToken,
-      refreshToken,
-    });
+    res
+      .cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: 'Lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+      })
+      .status(200)
+      .json({
+        user: {
+          _id: user._id,
+          username: user.username,
+          phone: user.phone,
+          email: user.email,
+          role: user.role,
+        },
+        accessToken,
+      });
   } catch (error) {
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map(err => err.message);
@@ -67,17 +75,24 @@ exports.loginUser = async (req, res) => {
     // Сохраняем refresh токен в БД
     await RefreshToken.create({ token: refreshToken, userId: user._id });
 
-    res.status(200).json({
-      user: {
-        _id: user._id,
-        username: user.username,
-        phone: user.phone,
-        email: user.email,
-        role: user.role,
-      },
-      accessToken,
-      refreshToken,
-    });
+    res
+      .cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: 'Lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+      })
+      .status(200)
+      .json({
+        user: {
+          _id: user._id,
+          username: user.username,
+          phone: user.phone,
+          email: user.email,
+          role: user.role,
+        },
+        accessToken,
+      });
   } catch (error) {
     console.error("Ошибка при входе:", error);
     res.status(500).json({ message: "Ошибка сервера при входе" });
@@ -90,7 +105,8 @@ exports.getMe = async (req, res) => {
 };
 
 exports.refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies?.refreshToken;
+  if (!refreshToken) return res.status(401).json({ message: "Токен не предоставлен" });
   if (!refreshToken) return res.status(401).json({ message: "Токен не предоставлен" });
 
   const foundToken = await RefreshToken.findOne({ token: refreshToken });

@@ -1,8 +1,6 @@
-// middlewares/uploadMiddleware.js
 const multer = require('multer');
 const path = require('path');
 
-// Настройка хранилища
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads/')
@@ -26,4 +24,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter });
 
-module.exports = upload;
+module.exports = {
+  uploadSingle: multer({ storage, fileFilter }).single('image'),
+  uploadMultiple: multer({ storage, fileFilter }).array('images', 5), // максимум 5
+};

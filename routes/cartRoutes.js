@@ -9,7 +9,12 @@ router.post('/', authMiddleware, cartController.addToCart);
 // Получить корзину
 router.get('/', authMiddleware, cartController.getCart);
 
+// Обновить товар в корзине
+router.put('/:productId', authMiddleware, cartController.updateCartItem);
+
 // Удалить товар
 router.delete('/:productId', authMiddleware, cartController.removeFromCart);
+
+router.post("/sync", authMiddleware, cartController.syncCart)
 
 module.exports = router;

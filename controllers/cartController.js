@@ -42,6 +42,33 @@ exports.getCart = async (req, res) => {
   }
 };
 
+// PUT /api/cart/:productId — обновить количество товара в корзине
+exports.updateCartItem = async (req, res) => {
+  const { productId } = req.params;
+  const { quantity } = req.body;
+
+  try {
+    const cart = await Cart.findOne({ user: req.user._id });
+    if (!cart) return res.status(404).json({ message: 'Корзина не найдена' });
+
+    const itemIndex = cart.products.findIndex((p) => p.product.toString() === productId);
+    if (itemIndex > -1) {
+      if (quantity <= 0) {
+        cart.products.splice(itemIndex, 1); // Удаляем товар, если количество <= 0
+      } else {
+        cart.products[itemIndex].quantity = quantity; // Обновляем количество товара
+      }
+    } else {
+      return res.status(404).json({ message: 'Товар не найден в корзине' });
+    }
+
+    const updated = await cart.save();
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: 'Ошибка при обновлении корзины' });
+  }
+};
+
 // DELETE /api/cart/:productId — удалить товар из корзины
 exports.removeFromCart = async (req, res) => {
   try {
@@ -56,5 +83,34 @@ exports.removeFromCart = async (req, res) => {
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: 'Ошибка при удалении из корзины' });
+  }
+};
+
+exports.syncCart = async (req, res) => {
+  const userId = req.user._id;
+  const incomingProducts = req.body.products; // [{ product, quantity }]
+
+  try {
+    let cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      cart = new Cart({ user: userId, products: incomingProducts });
+    } else {
+      incomingProducts.forEach((incoming) => {
+        const existingIndex = cart.products.findIndex(
+          (item) => item.product.toString() === incoming.product
+        );
+        if (existingIndex > -1) {
+          cart.products[existingIndex].quantity += incoming.quantity;
+        } else {
+          cart.products.push(incoming);
+        }
+      });
+    }
+
+    await cart.save();
+    res.json(cart);
+  } catch (err) {
+    res.status(500).json({ message: 'Ошибка при синхронизации корзины' });
   }
 };

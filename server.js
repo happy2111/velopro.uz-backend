@@ -3,14 +3,21 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const path = require("path");
 require("dotenv").config();
+const cookieParser = require('cookie-parser');
+
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
 }
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser());
+
 
 app.get("/", (req, res) => {
   res.send("🚲 BikeShop backend is running!");

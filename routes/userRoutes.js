@@ -10,6 +10,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const authorizeRoles = require('../middlewares/authorizeRole');
 
 router.get('/', authMiddleware, authorizeRoles("admin"), getAllUsers);
+
 router.get('/:id', authMiddleware, getUserById);
 router.put('/:id', authMiddleware, updateUser);
 router.delete('/:id', authMiddleware, authorizeRoles("admin"), deleteUser);

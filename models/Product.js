@@ -32,7 +32,10 @@ const productSchema = new mongoose.Schema({
     enum: ['горный', 'шоссейный', 'городской', 'электро', 'детский'],
     required: true,
   },
-  image: String,
+  images: {
+    type: [String],
+    default: [],
+  },
   price: {
     type: Number,
     required: true,

@@ -9,11 +9,11 @@ const {
 } = require('../controllers/productController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const authorizeRoles = require('../middlewares/authorizeRole');
-const upload = require('../middlewares/uploadMiddleware');
+const { uploadMultiple } = require('../middlewares/uploadMiddleware');
 router.get('/', getAllProducts);
 router.get('/:id', getProductById);
-router.post('/', authMiddleware, authorizeRoles("admin"),upload.single('image'), createProduct);
-router.put('/:id', authMiddleware, authorizeRoles("admin"),upload.single("image"), updateProduct);
+router.post('/', authMiddleware, authorizeRoles("admin", "user"),uploadMultiple, createProduct);
+router.put('/:id', authMiddleware, authorizeRoles("admin"),uploadMultiple, updateProduct);
 router.delete('/:id', authMiddleware, authorizeRoles("admin"), deleteProduct);
 
 module.exports = router;

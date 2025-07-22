@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const fs = require('fs');
 const path = require('path');
+const multerErrorHandler = require('../middlewares/multerErrorHandler');
 
 
 // GET /products?search=велосипед&type=горный
@@ -32,33 +33,26 @@ exports.getProductById = async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Товар не найден' });
     res.json(product);
   } catch (err) {
-    res.status(500).json({ message: 'Ошибка при получении товара' });
+    res.status(500).json({ message: 'Ошибка при получении товара', err: err.message });
   }
 };
 
 // POST /products — создать товар (только админ)
 exports.createProduct = async (req, res) => {
   try {
-    const { title, description, price, stock, category } = req.body;
+    const imagePaths = req.files.map(file => `/uploads/${file.filename}`);
 
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
-
-    const newProduct = new Product({
-      title,
-      description,
-      price,
-      stock,
-      category,
-      image,
+    const product = new Product({
+      ...req.body,
+      images: imagePaths,
     });
 
-    const saved = await newProduct.save();
-    res.status(201).json(saved);
+    await product.save();
+    res.status(201).json(product);
   } catch (err) {
-    res.status(500).json({ message: 'Ошибка при создании товара' });
+    res.status(500).json({ message: err.message });
   }
 };
-
 
 // PUT /products/:id — обновить товар (только админ)
 exports.updateProduct = async (req, res) => {
@@ -77,19 +71,18 @@ exports.updateProduct = async (req, res) => {
     product.isFeatured = isFeatured ?? product.isFeatured;
 
     // Обработка нового изображения
-    if (req.file) {
-      // Удаляем старое изображение, если есть
-      if (product.image) {
-        const oldImagePath = path.join(__dirname, '..', 'public', product.image);
-        fs.unlink(oldImagePath, (err) => {
-          if (err) {
-            console.error('Ошибка при удалении старого изображения:', err.message);
-          }
+    if (req.files && req.files.length > 0) {
+      if (Array.isArray(product.images)) {
+        product.images.forEach(img => {
+          const oldImagePath = path.join(__dirname, '..', 'public', img);
+          fs.unlink(oldImagePath, (err) => {
+            if (err) console.error('Ошибка при удалении изображения:', err.message);
+          });
         });
       }
 
-      // Сохраняем новое изображение
-      product.image = `/uploads/${req.file.filename}`;
+      // Сохранить новые изображения
+      product.image = req.files.map(file => `/uploads/${file.filename}`);
     }
 
     const updated = await product.save();
@@ -99,15 +92,25 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-
-
 // DELETE /products/:id — удалить товар (только админ)
 exports.deleteProduct = async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'Товар не найден' });
+
+    // Удаляем изображение, если оно есть
+    if (deleted.image) {
+      const imagePath = path.join(__dirname, '..', 'public', deleted.image);
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error('Ошибка при удалении изображения:', err.message);
+        }
+      });
+    }
+
     res.json({ message: 'Товар удалён' });
   } catch (err) {
     res.status(500).json({ message: 'Ошибка при удалении товара' });
   }
 };
+

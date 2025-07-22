@@ -18,7 +18,7 @@ exports.getUserById = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: 'Ошибка при получении пользователя' });
+    res.status(500).json({ message: 'Ошибка при получении пользователя' , err: err.message});
   }
 };
 
