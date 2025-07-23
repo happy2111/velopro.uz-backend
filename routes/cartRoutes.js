@@ -15,6 +15,9 @@ router.put('/:productId', authMiddleware, cartController.updateCartItem);
 // Удалить товар
 router.delete('/:productId', authMiddleware, cartController.removeFromCart);
 
+router.delete('/', authMiddleware, cartController.clearCart);
+
+// Синхронизировать корзину
 router.post("/sync", authMiddleware, cartController.syncCart)
 
 module.exports = router;

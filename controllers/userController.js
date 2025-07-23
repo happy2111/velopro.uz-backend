@@ -1,10 +1,26 @@
 const User = require('../models/User');
 
-// GET all users (admin only)
+// GET /users?search=abc&role=admin (search by username , email or phone and filter by role)
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // не показываем пароли
+    const { search, role } = req.query;
+    const query = {};
+
+    if (search) {
+      query.$or = [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (role) {
+      query.role = role; // Фильтр по роли
+    }
+
+    const users = await User.find(query).select('-password'); // Исключаем пароль из ответа
     res.json(users);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Ошибка при получении пользователей' });
