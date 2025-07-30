@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'test') {
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', "http://192.168.1.149:5173"],
   credentials: true,
 }));
 app.use(express.json());
@@ -31,10 +31,12 @@ app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 
 
-
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server работает на порту:
+  ➜ Local:   http://localhost:${PORT}
+  ➜ Network: http://${require('os').networkInterfaces().eth0?.[0].address || 'YOUR_IP'}:${PORT}
+`);
   });
 }
 

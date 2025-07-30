@@ -3,13 +3,24 @@ const Order = require('../models/Order');
 // POST /api/orders — создать заказ
 exports.createOrder = async (req, res) => {
   try {
-    const { products, totalPrice } = req.body;
+    const {
+      products,
+      total,
+      shippingAddress,
+      contactInfo,
+      paymentMethod,
+      note
+    } = req.body;
     const userId = req.user._id;
 
     const newOrder = new Order({
       user: userId,
       products,
-      totalPrice,
+      total,
+      shippingAddress,
+      contactInfo,
+      paymentMethod,
+      note,
     });
 
     const saved = await newOrder.save();
@@ -22,7 +33,7 @@ exports.createOrder = async (req, res) => {
 // GET /api/orders — список заказов (только админ)
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('user', 'email').populate('products.product');
+    const orders = await Order.find().populate('user', 'username',).populate('products.product');
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: 'Ошибка при получении заказов' });
