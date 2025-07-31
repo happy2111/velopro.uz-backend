@@ -7,24 +7,51 @@ const multerErrorHandler = require('../middlewares/multerErrorHandler');
 // GET /products?search=велосипед&type=горный
 exports.getAllProducts = async (req, res) => {
   try {
-    const { search, type } = req.query;
+    const { search, type, limit = 8, page = 1, excludeId , min, max } = req.query;
 
     const query = {};
 
+
     if (search) {
-      query.title = { $regex: search, $options: 'i' }; // Поиск по названию
+      query.title = { $regex: search, $options: 'i' };
     }
 
     if (type) {
-      query.type = type; // Фильтр по типу: горный, шоссейный и т.д.
+      const typeArray = type.split(',');
+      query.type = { $in: typeArray };
     }
 
-    const products = await Product.find(query);
-    res.json(products);
+    if (min || max) {
+      query.price = {};
+      if (min) query.price.$gte = parseFloat(min);
+      if (max) query.price.$lte = parseFloat(max);
+    }
+
+    if (excludeId) {
+      query._id = { $ne: excludeId };
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [products, totalCount] = await Promise.all([
+      Product.find(query).skip(skip).limit(Number(limit)),
+      Product.countDocuments(query)
+    ]);
+
+    res.json({
+      products,
+      totalCount,
+      currentPage: Number(page),
+      totalPages: Math.ceil(totalCount / Number(limit))
+    });
+
   } catch (err) {
+    console.error("Product fetch error:", err);
     res.status(500).json({ message: 'Ошибка при получении товаров' });
   }
 };
+
+
 
 // GET /products/:id
 exports.getProductById = async (req, res) => {
