@@ -6,7 +6,7 @@ const reviewSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  name: String, // имя пользователя (можно для удобства)
+  name: String,
   rating: {
     type: Number,
     required: true,
@@ -21,17 +21,30 @@ const reviewSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
+  // 🔹 Категория товара: велосипед, запчасть, аксессуар
+  category: {
+    type: String,
+    enum: ['bike', 'part', 'accessory'],
+    required: true,
+  },
+
   title: {
     type: String,
     required: true,
   },
   brand: String,
   description: String,
+
+  // 🔸 Только для велосипедов (bike)
   type: {
     type: String,
     enum: ['горный', 'шоссейный', 'городской', 'электро', 'детский'],
-    required: true,
   },
+  frameSize: String,
+  wheelSize: String,
+  weight: Number,
+
+  // Общие поля
   images: {
     type: [String],
     default: [],
@@ -44,23 +57,14 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  frameSize: String,
-  wheelSize: String,
-  weight: Number,
-
-  // 🔥 Флаг для отображения на главной
   isFeatured: {
     type: Boolean,
     default: false,
   },
-
-  // ⭐️ Средняя оценка
   averageRating: {
     type: Number,
     default: 0,
   },
-
-  // 💬 Отзывы
   reviews: [reviewSchema],
 
 }, { timestamps: true });

@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'test') {
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cors({
-  origin: ['http://localhost:5173', "http://192.168.1.149:5173", "https://velopro.vercel.app"],
+  origin: ['http://localhost:5173', "http://192.168.0.110:5173", "http://192.168.0.112:5173", "https://velopro.vercel.app"],
   credentials: true,
 }));
 app.use(express.json());
@@ -36,7 +36,8 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server работает на порту:
   ➜ Local:   http://localhost:${PORT}
-  ➜ Network: http://${require('os').networkInterfaces().eth0?.[0].address || 'YOUR_IP'}:${PORT}
+  ➜ Network: http://${require('os').networkInterfaces().wlan0?.[0].address || 'YOUR_IP'}:${PORT}
+  ➜ Network: http://${require('os').networkInterfaces().wlan1?.[0].address || 'YOUR_IP'}:${PORT}
 `);
   });
 }

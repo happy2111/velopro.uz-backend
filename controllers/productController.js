@@ -2,47 +2,67 @@ const Product = require('../models/Product');
 const fs = require('fs');
 const path = require('path');
 const multerErrorHandler = require('../middlewares/multerErrorHandler');
+const mongoose = require('mongoose');
 
 
 // GET /products?search=велосипед&type=горный
 exports.getAllProducts = async (req, res) => {
   try {
-    const { search, type, limit = 8, page = 1, excludeId , min, max } = req.query;
+    const {
+      search,
+      type,
+      category,
+      limit = 8,
+      page = 1,
+      excludeId,
+      min,
+      max,
+    } = req.query;
 
     const query = {};
 
 
+    // 🔍 Поиск по названию
     if (search) {
       query.title = { $regex: search, $options: 'i' };
     }
 
+    // 🚲 Фильтр по типу (для велосипедов)
     if (type) {
       const typeArray = type.split(',');
       query.type = { $in: typeArray };
     }
 
+    // 📦 Категория: bike, part, accessory
+    if (category) {
+      const categoryArray = category.split(',');
+      query.category = { $in: categoryArray };
+    }
+
+    // 💰 Фильтр по цене
     if (min || max) {
       query.price = {};
       if (min) query.price.$gte = parseFloat(min);
       if (max) query.price.$lte = parseFloat(max);
     }
 
+    // ❌ Исключить конкретный товар (например, на странице похожих)
     if (excludeId) {
-      query._id = { $ne: excludeId };
+      query._id = { $ne: new mongoose.Types.ObjectId(excludeId) };
     }
 
     const skip = (Number(page) - 1) * Number(limit);
 
     const [products, totalCount] = await Promise.all([
       Product.find(query).skip(skip).limit(Number(limit)),
-      Product.countDocuments(query)
+      Product.countDocuments(query),
     ]);
 
     res.json({
       products,
       totalCount,
       currentPage: Number(page),
-      totalPages: Math.ceil(totalCount / Number(limit))
+      totalPages: Math.ceil(totalCount / Number(limit)),
     });
 
   } catch (err) {
@@ -50,6 +70,7 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ message: 'Ошибка при получении товаров' });
   }
 };
+
 
 
 
