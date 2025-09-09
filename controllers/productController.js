@@ -40,11 +40,13 @@ exports.getAllProducts = async (req, res) => {
     }
 
     // 💰 Фильтр по цене
-    if (min || max) {
+    if (min !== undefined || max !== undefined) {
       query.price = {};
-      if (min) query.price.$gte = parseFloat(min);
-      if (max) query.price.$lte = parseFloat(max);
+      if (min !== undefined) query.price.$gte = parseFloat(min);
+      if (max !== undefined) query.price.$lte = parseFloat(max);
     }
+
+
 
     // ❌ Исключить конкретный товар (например, на странице похожих)
     if (excludeId) {
